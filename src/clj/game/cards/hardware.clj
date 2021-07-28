@@ -1157,12 +1157,10 @@
                                   (damage-prevent :net 1))}]}))
 
 (defcard "Mu Safecracker"
-  {:implementation "Stealth credit restriction not enforced"
-   :events [{:event :successful-run
+  {:events [{:event :successful-run
              :optional
              {:req (req (and (= :hq (target-server context))
-                             (some #(has-subtype? % "Stealth")
-                                   (all-active state :runner))))
+                             (can-pay? state side eid card (:title card) (all-stealth [:credit 1]))))
               :prompt "Pay 1 [Credits] to access 1 additional card?"
               :yes-ability
               {:cost [:credit 1]
@@ -1172,8 +1170,7 @@
             {:event :successful-run
              :optional
              {:req (req (and (= :rd (target-server context))
-                             (some #(has-subtype? % "Stealth")
-                                   (all-active state :runner))))
+                             (can-pay? state side eid card (:title card) (all-stealth [:credit 2]))))
               :prompt "Pay 2 [Credits] to access 1 additional card?"
               :yes-ability
               {:cost [:credit 2]

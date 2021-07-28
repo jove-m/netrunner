@@ -123,11 +123,12 @@
 (defn break-sub-ability-cost
   ([state side ability card] (break-sub-ability-cost state side ability card nil))
   ([state side ability card targets]
-   (concat (:break-cost ability)
-           (:additional-cost ability)
-           (when-let [break-fn (:break-cost-bonus ability)]
-             (break-fn state side (make-eid state) card targets))
-           (get-effects state side card :break-sub-additional-cost (flatten [ability targets])))))
+   (let [cost-req (or (:cost-req ability) identity)]
+    (cost-req (concat (:break-cost ability)
+                      (:additional-cost ability)
+                      (when-let [break-fn (:break-cost-bonus ability)]
+                        (break-fn state side (make-eid state) card targets))
+                      (get-effects state side card :break-sub-additional-cost (flatten [ability targets])))))))
 
 (defn jack-out-cost
   ([state side] (jack-out-cost state side nil))
@@ -137,12 +138,14 @@
 (defn all-stealth
   "To be used as the :cost-req of an ability. Requires all credits spent to be stealth credits."
   [costs]
-  (mapv #(condp = (cost-name %) :x-credits [:x-credits nil -1] :credit [:credit (value %) (value %)] %) costs))
+  (let [costs (merge-costs costs)]
+    (mapv #(condp = (cost-name %) :x-credits [:x-credits 0 -1] :credit [:credit (value %) (value %)] %) costs)))
 
 (defn min-stealth
   "Returns a function to be used as the :cost-req of an ability. Requires a minimum number of credits spent to be stealth"
   [stealth-requirement]
   (fn [costs]
-    (if (some #(= (cost-name %) :credit) costs)
-      (map #(if (= (cost-name %) :credit) [:credit (value %) stealth-requirement] %) costs)
-      (map #(if (= (cost-name %) :x-credits) [:x-credits nil stealth-requirement] %) costs))))
+    (let [costs (merge-costs costs)]
+      (if (some #(= (cost-name %) :credit) costs)
+        (map #(if (= (cost-name %) :credit) [:credit (value %) stealth-requirement] %) costs)
+        (map #(if (= (cost-name %) :x-credits) [:x-credits 0 stealth-requirement] %) costs)))))

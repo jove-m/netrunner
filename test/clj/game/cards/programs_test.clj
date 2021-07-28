@@ -67,30 +67,40 @@
       (new-game {:corp {:deck [(qty "Hedge Fund" 5)]
                         :hand ["Rototurret"]
                         :credits 10}
-                 :runner {:hand ["Afterimage"]
+                 :runner {:hand ["Afterimage" (qty "Mantle" 2)]
                           :credits 10}})
       (play-from-hand state :corp "Rototurret" "HQ")
       (take-credits state :corp)
       (play-from-hand state :runner "Afterimage")
+      (play-from-hand state :runner "Mantle")
+      (play-from-hand state :runner "Mantle")
       (run-on state "HQ")
       (rez state :corp (get-ice state :hq 0))
       (run-continue state)
       (click-prompt state :runner "Yes")
+      (click-card state :runner (get-program state 1))
+      (click-card state :runner (get-program state 2))
       (is (= :approach-server (:phase (get-run))) "Run has bypassed Rototurret")))
   (testing "Can only be used once per turn. #5032"
     (do-game
       (new-game {:corp {:deck [(qty "Hedge Fund" 5)]
                         :hand ["Rototurret"]
                         :credits 10}
-                 :runner {:hand ["Afterimage"]
+                 :runner {:hand ["Afterimage" (qty "Mantle" 2)]
                           :credits 10}})
       (play-from-hand state :corp "Rototurret" "HQ")
       (take-credits state :corp)
       (play-from-hand state :runner "Afterimage")
+      (play-from-hand state :runner "Mantle")
+      (play-from-hand state :runner "Mantle")
+      (take-credits state :runner)
+      (take-credits state :corp)
       (run-on state "HQ")
       (rez state :corp (get-ice state :hq 0))
       (run-continue state)
       (click-prompt state :runner "Yes")
+      (click-card state :runner (get-program state 1))
+      (click-card state :runner (get-program state 2))
       (is (= :approach-server (:phase (get-run))) "Run has bypassed Rototurret")
       (run-jack-out state)
       (run-on state "HQ")

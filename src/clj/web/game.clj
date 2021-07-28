@@ -205,6 +205,7 @@
         (ws/broadcast-to! [client-id] :netrunner/error nil)
         (println "Caught exception")
         (println (str "Exception Data: " (or (ex-data e) (.getMessage e))))
+        (clojure.stacktrace/print-stack-trace e)
         (println (str "Command: " command))
         (println (str "GameId: " gameid-str))))))
 

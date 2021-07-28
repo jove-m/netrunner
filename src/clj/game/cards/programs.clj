@@ -311,7 +311,7 @@
                               :interactive (req true)
                               :optional
                               {:req (req (and (has-subtype? (:ice context) "Sentry")
-                                              (can-pay? state :runner eid card nil [:credit 2])))
+                                              (can-pay? state :runner eid card nil (all-stealth [:credit 2]))))
                                :once :per-turn
                                :prompt (msg "Pay 2 [Credits] to bypass " (:title (:ice context)))
                                :yes-ability

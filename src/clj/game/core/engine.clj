@@ -372,7 +372,7 @@
        :prompt-type :waiting
        :msg (str "Waiting for " waiting-prompt)}))
   ;; Ensure that any costs can be paid
-  (wait-for (pay state side (make-eid state eid) card cost {:action (:cid card)})
+  (wait-for (pay state side (make-eid state eid) card cost {:action (:cid card) :cost-req (:cost-req ability)})
             ;; If the cost can be and is paid, perform the ablity
             (let [payment-str (:msg async-result)
                   cost-paid (merge-costs-paid (:cost-paid eid) (:cost-paid async-result))]
@@ -1061,8 +1061,9 @@
   [state side eid card & args]
   (let [args (flatten args)
         raw-costs (remove map? args)
-        actions (filter map? args)]
-    (if-let [costs (can-pay? state side eid card (:title card) raw-costs)]
+        actions (filter map? args)
+        cost-req (if-let [cr (some :cost-req actions)] cr identity)]
+    (if-let [costs (can-pay? state side eid card (:title card) (cost-req raw-costs))]
       (wait-for (pay-next state side (make-eid state eid) costs card actions [])
                 (let [payment-result async-result]
                   (wait-for (checkpoint state nil (make-eid state eid) nil)
