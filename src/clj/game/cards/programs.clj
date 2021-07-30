@@ -959,7 +959,7 @@
                 :effect (effect (damage-prevent :net Integer/MAX_VALUE))}]})
 
 (defcard "Dhegdheer"
-  {:abilities [{:req (req (and (not (get-in card [:special :dheg-prog]))
+  {:abilities [{:req (req (and (not (some program? (:hosted card)))
                                (some #(and (program? %)
                                            (runner-can-install? state side % false)
                                            (can-pay? state side (assoc eid :source card :source-type :runner-install) % nil
@@ -978,13 +978,12 @@
                                (when (-> target :cost pos?)
                                  ", lowering its cost by 1 [Credit]")))
                 :async true
-                :effect (effect (update! (assoc-in card [:special :dheg-prog] (:cid target)))
-                                (runner-install (assoc eid :source (get-card state card) :source-type :runner-install)
+                :effect (effect (runner-install (assoc eid :source (get-card state card) :source-type :runner-install)
                                                 target {:host-card (get-card state card)
                                                         :no-mu true
                                                         :cost-bonus -1}))}
                {:label "Host an installed program on Dhegdheer with [Credit] discount"
-                :req (req (nil? (get-in card [:special :dheg-prog])))
+                :req (req (not (some program? (:hosted card))))
                 :prompt "Choose an installed program to host on Dhegdheer with [Credit] discount"
                 :choices {:card #(and (program? %)
                                       (installed? %))}
@@ -997,11 +996,10 @@
                                          (host state side card (get-card state target))
                                          (unregister-effects-for-card state side target #(= :used-mu (:type %)))
                                          (update-mu state)
-                                         (update! state side (assoc-in (get-card state card) [:special :dheg-prog] (:cid target)))
                                          (update-breaker-strength state side target)
                                          (effect-completed state side eid))))}
                {:label "Host an installed program on Dhegdheer"
-                :req (req (nil? (get-in card [:special :dheg-prog])))
+                :req (req (not (some program? (:hosted card))))
                 :prompt "Choose an installed program to host on Dhegdheer"
                 :choices {:card #(and (program? %)
                                       (installed? %))}
@@ -1009,8 +1007,7 @@
                 :effect (effect (host card (get-card state target))
                                 (unregister-effects-for-card target #(= :used-mu (:type %)))
                                 (update-mu)
-                                (update-breaker-strength target)
-                                (update! (assoc-in (get-card state card) [:special :dheg-prog] (:cid target))))}]})
+                                (update-breaker-strength target))}]})
 
 (defcard "Disrupter"
   {:events
